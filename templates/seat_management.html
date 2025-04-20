@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}Seat Management - RailGuard India{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="bi bi-layout-wtf"></i> Seat Management System</h2>
+        <p class="lead">Track and manage seat occupancy, resolve disputes, and reallocate vacant seats</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Seat Management Form -->
+    <div class="col-md-4 mb-4">
+        <div class="card form-section">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Update Seat Status</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('seat_management') }}" method="post">
+                    <div class="mb-3">
+                        <label for="coach" class="form-label">Coach</label>
+                        <input type="text" class="form-control" id="coach" name="coach" placeholder="E.g., S1" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="seat_number" class="form-label">Seat Number</label>
+                        <input type="text" class="form-control" id="seat_number" name="seat_number" placeholder="E.g., 15" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="" selected disabled>Select status</option>
+                            <option value="occupied">Occupied</option>
+                            <option value="vacant">Vacant</option>
+                            <option value="reserved">Reserved</option>
+                            <option value="disputed">Disputed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Passenger Phone (for occupied seats)</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}" placeholder="10-digit phone number">
+                        <small class="form-text text-muted">Required only if status is "occupied"</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">Update Seat</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Dispute Resolution</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-info-circle"></i> How to Resolve Seat Disputes</h6>
+                    <ol class="mb-0 ps-3">
+                        <li>Verify passenger Trust IDs</li>
+                        <li>Check both QR codes in system</li>
+                        <li>Mark seat as "disputed" if needed</li>
+                        <li>Use timestamp priority for resolution</li>
+                        <li>Allocate alternative seat if available</li>
+                    </ol>
+                </div>
+                
+                <div class="mt-3">
+                    <p class="text-muted">Need assistance? Contact the TT via station intercom or call the helpline at 139.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Seat Visualization -->
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Coach S1 Seat Map</h5>
+                <div>
+                    <select class="form-select form-select-sm" id="coachSelector">
+                        <option value="S1">Coach S1</option>
+                        <option value="S2">Coach S2</option>
+                        <option value="S3">Coach S3</option>
+                        <option value="S4">Coach S4</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="d-flex gap-3">
+                        <div class="d-flex align-items-center">
+                            <div class="seat vacant me-2" style="width: 30px; height: 30px;"></div>
+                            <span>Vacant</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="seat occupied me-2" style="width: 30px; height: 30px;"></div>
+                            <span>Occupied</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="seat selected me-2" style="width: 30px; height: 30px;"></div>
+                            <span>Selected</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="seat me-2" style="width: 30px; height: 30px; background-color: #ffc107;"></div>
+                            <span>Disputed</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="seat-map">
+                    {% if seats %}
+                        {% set current_coach = '' %}
+                        {% for seat in seats %}
+                            {% if seat.coach != current_coach %}
+                                {% set current_coach = seat.coach %}
+                                <div class="w-100 my-2 border-bottom pb-2">
+                                    <h6>Coach {{ seat.coach }}</h6>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="seat {{ seat.status }}" 
+                                 data-coach="{{ seat.coach }}" 
+                                 data-seat="{{ seat.seat_number }}">
+                                {{ seat.seat_number }}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Coach S1 (Demo Visualization) -->
+                        <div class="w-100 my-2 border-bottom pb-2">
+                            <h6>Coach S1 (Sample Visualization)</h6>
+                        </div>
+                        
+                        <!-- Row 1 -->
+                        <div class="seat occupied" data-coach="S1" data-seat="1">1</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="2">2</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="3">3</div>
+                        <div class="seat vacant" data-coach="S1" data-seat="4">4</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="5">5</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="6">6</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="7">7</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="8">8</div>
+                        
+                        <!-- Row 2 -->
+                        <div class="seat" style="background-color: #ffc107;" data-coach="S1" data-seat="9">9</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="10">10</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="11">11</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="12">12</div>
+                        <div class="seat vacant" data-coach="S1" data-seat="13">13</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="14">14</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="15">15</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="16">16</div>
+                        
+                        <!-- Row 3 -->
+                        <div class="seat occupied" data-coach="S1" data-seat="17">17</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="18">18</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="19">19</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="20">20</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="21">21</div>
+                        <div class="seat vacant" data-coach="S1" data-seat="22">22</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="23">23</div>
+                        <div class="seat occupied" data-coach="S1" data-seat="24">24</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Seat Statistics and Reallocation -->
+        <div class="row mt-4">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Seat Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>Coach S1</h6>
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 90%" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100">90% Occupied</div>
+                            </div>
+                            <small class="text-muted">72 seats total | 65 occupied | 7 vacant</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6>Coach S2</h6>
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 85%" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100">85% Occupied</div>
+                            </div>
+                            <small class="text-muted">72 seats total | 61 occupied | 11 vacant</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6>Coach S3</h6>
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 78%" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100">78% Occupied</div>
+                            </div>
+                            <small class="text-muted">72 seats total | 56 occupied | 16 vacant</small>
+                        </div>
+                        
+                        <div>
+                            <h6>Coach S4</h6>
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 62%" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100">62% Occupied</div>
+                            </div>
+                            <small class="text-muted">72 seats total | 45 occupied | 27 vacant</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Dynamic Seat Reallocation</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>AI-based vacant seat reallocation for standing passengers:</p>
+                        
+                        <div class="alert alert-success">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="bi bi-lightning-charge-fill fs-3"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Reallocation Recommended</h6>
+                                    <p class="mb-0">Coach S4 has 27 vacant seats and is recommended for reallocation.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-primary w-100 mb-2">
+                                <i class="bi bi-arrow-repeat"></i> Reallocate Vacant Seats
+                            </button>
+                            
+                            <small class="d-block text-muted text-center">
+                                SMS notifications will be sent to standing passengers and TTs
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Seat Updates -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Seat Updates</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Coach</th>
+                                <th>Seat</th>
+                                <th>Status</th>
+                                <th>Phone</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if seats %}
+                                {% for seat in seats %}
+                                <tr>
+                                    <td>{{ seat.coach }}</td>
+                                    <td>{{ seat.seat_number }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if seat.status == 'vacant' else ('danger' if seat.status == 'occupied' else 'warning') }}">
+                                            {{ seat.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ seat.phone[-4:].rjust(10, '*') if seat.phone else '-' }}</td>
+                                    <td>{{ seat.last_updated.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <!-- Sample data for visualization -->
+                                <tr>
+                                    <td>S1</td>
+                                    <td>9</td>
+                                    <td><span class="badge bg-warning">Disputed</span></td>
+                                    <td>******3578</td>
+                                    <td>2023-08-15 14:23</td>
+                                </tr>
+                                <tr>
+                                    <td>S1</td>
+                                    <td>13</td>
+                                    <td><span class="badge bg-success">Vacant</span></td>
+                                    <td>-</td>
+                                    <td>2023-08-15 14:20</td>
+                                </tr>
+                                <tr>
+                                    <td>S1</td>
+                                    <td>22</td>
+                                    <td><span class="badge bg-success">Vacant</span></td>
+                                    <td>-</td>
+                                    <td>2023-08-15 14:18</td>
+                                </tr>
+                                <tr>
+                                    <td>S1</td>
+                                    <td>4</td>
+                                    <td><span class="badge bg-success">Vacant</span></td>
+                                    <td>-</td>
+                                    <td>2023-08-15 14:15</td>
+                                </tr>
+                                <tr>
+                                    <td>S2</td>
+                                    <td>17</td>
+                                    <td><span class="badge bg-danger">Occupied</span></td>
+                                    <td>******9012</td>
+                                    <td>2023-08-15 14:10</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Coach selector functionality
+        const coachSelector = document.getElementById('coachSelector');
+        if (coachSelector) {
+            coachSelector.addEventListener('change', function() {
+                const selectedCoach = this.value;
+                // In a real implementation, this would load the selected coach's seats from the server
+                alert(`Loading seats for coach ${selectedCoach}. (Functionality would be implemented in production)`);
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,466 @@
+
+{% extends "base.html" %}
+
+{% block title %}Issue Fine - RailGuard India{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="bi bi-cash-coin"></i> Issue Fine</h2>
+        <p class="lead">Issue fines for railway violations with blockchain verification</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Fine Form -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Fine Details</h5>
+            </div>
+            <div class="card-body">
+                <form id="issueFineForm">
+                    <div class="mb-3">
+                        <label for="passengerPhone" class="form-label">Passenger Phone Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                            <input type="tel" class="form-control" id="passengerPhone" name="passengerPhone" pattern="[0-9]{10}" placeholder="10-digit phone number" required>
+                            <button type="button" class="btn btn-outline-primary" id="verifyTrustIdBtn">Verify Trust ID</button>
+                        </div>
+                        <div id="trustIdStatus" class="form-text">Trust ID status will appear here</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="trainNumber" class="form-label">Train Number</label>
+                        <input type="text" class="form-control" id="trainNumber" name="trainNumber" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="coach" class="form-label">Coach</label>
+                            <input type="text" class="form-control" id="coach" name="coach" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" name="location" placeholder="Station/Between stations">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="violationType" class="form-label">Violation Type</label>
+                        <select class="form-control" id="violationType" name="violationType" required>
+                            <option value="">Select violation type</option>
+                            <option value="No valid ticket">No valid ticket</option>
+                            <option value="Traveling in higher class">Traveling in higher class</option>
+                            <option value="Ticket tampering">Ticket tampering</option>
+                            <option value="Fraudulent QR code">Fraudulent QR code</option>
+                            <option value="Smoking in non-smoking area">Smoking in non-smoking area</option>
+                            <option value="Carrying prohibited items">Carrying prohibited items</option>
+                            <option value="Other violation">Other violation</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="otherViolationContainer" style="display: none;">
+                        <label for="otherViolation" class="form-label">Specify Violation</label>
+                        <textarea class="form-control" id="otherViolation" name="otherViolation" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="fineAmount" class="form-label">Fine Amount (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control" id="fineAmount" name="fineAmount" min="100" step="50" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Additional Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-cash-coin"></i> Issue Fine
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="scanQrBtn">
+                            <i class="bi bi-qr-code-scan"></i> Scan QR Code
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Fine Preview and History -->
+    <div class="col-md-6 mb-4">
+        <!-- Fine Receipt Preview -->
+        <div class="card d-none" id="finePreview">
+            <div class="card-header bg-warning">
+                <h5 class="card-title mb-0"><i class="bi bi-receipt"></i> Fine Receipt Preview</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h4>Indian Railways - RailGuard</h4>
+                    <h6>Passenger Fine Receipt</h6>
+                    <p class="mb-0"><strong>Fine ID:</strong> <span id="previewFineId">RGFN2541887</span></p>
+                </div>
+                
+                <div class="receipt-details">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th>Passenger:</th>
+                            <td id="previewPassenger">XXXXXXXX12</td>
+                        </tr>
+                        <tr>
+                            <th>Train:</th>
+                            <td id="previewTrain">12345 / Coach: S4</td>
+                        </tr>
+                        <tr>
+                            <th>Violation:</th>
+                            <td id="previewViolation">No valid ticket</td>
+                        </tr>
+                        <tr>
+                            <th>Amount:</th>
+                            <td id="previewAmount"><strong>₹500.00</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Issued By:</th>
+                            <td id="previewIssuedBy">TT: Rajesh Kumar (EMP123456)</td>
+                        </tr>
+                        <tr>
+                            <th>Date/Time:</th>
+                            <td id="previewDateTime">April 19, 2025 14:30</td>
+                        </tr>
+                        <tr>
+                            <th>Blockchain Hash:</th>
+                            <td id="previewBlockchainHash">0x5f7d8c...</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> This fine has been recorded on the blockchain and cannot be altered. Payment options will be sent to the passenger's phone number.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-success" id="confirmFineBtn">
+                            <i class="bi bi-check-circle"></i> Confirm & Issue
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="cancelFineBtn">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fine History -->
+        <div class="card" id="fineHistory">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Recent Fines Issued</h5>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Passenger</th>
+                                <th>Violation</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fineHistoryTable">
+                            <!-- Fine history will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- QR Scanner Modal -->
+        <div class="modal fade" id="qrScannerModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Scan QR Code</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center mb-3">
+                            <div id="scanner-container">
+                                <video id="qr-video" class="w-100 border rounded"></video>
+                            </div>
+                        </div>
+                        
+                        <div id="scanResult" class="mt-3 d-none alert alert-info">
+                            <p class="mb-0"><strong>Scan Result:</strong> <span id="resultText"></span></p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="useScannedDataBtn" disabled>Use Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const issueFineForm = document.getElementById('issueFineForm');
+        const finePreview = document.getElementById('finePreview');
+        const fineHistory = document.getElementById('fineHistory');
+        const scanQrBtn = document.getElementById('scanQrBtn');
+        const verifyTrustIdBtn = document.getElementById('verifyTrustIdBtn');
+        const confirmFineBtn = document.getElementById('confirmFineBtn');
+        const cancelFineBtn = document.getElementById('cancelFineBtn');
+        
+        // Populate some mock fine history
+        const mockFines = [
+            { date: "2025-04-19", passenger: "XXXX-XX-1234", violation: "No valid ticket", amount: 500, status: "Paid" },
+            { date: "2025-04-18", passenger: "XXXX-XX-5678", violation: "Traveling in higher class", amount: 250, status: "Pending" },
+            { date: "2025-04-17", passenger: "XXXX-XX-9012", violation: "Fraudulent QR code", amount: 750, status: "Disputed" },
+            { date: "2025-04-16", passenger: "XXXX-XX-3456", violation: "Smoking", amount: 200, status: "Paid" },
+            { date: "2025-04-15", passenger: "XXXX-XX-7890", violation: "No valid ticket", amount: 500, status: "Pending" }
+        ];
+        
+        const fineHistoryTable = document.getElementById('fineHistoryTable');
+        mockFines.forEach(fine => {
+            const row = document.createElement('tr');
+            const formattedDate = new Date(fine.date).toLocaleDateString();
+            
+            let statusBadge;
+            if (fine.status === "Paid") {
+                statusBadge = `<span class="badge bg-success">Paid</span>`;
+            } else if (fine.status === "Pending") {
+                statusBadge = `<span class="badge bg-warning">Pending</span>`;
+            } else {
+                statusBadge = `<span class="badge bg-danger">Disputed</span>`;
+            }
+            
+            row.innerHTML = `
+                <td>${formattedDate}</td>
+                <td>${fine.passenger}</td>
+                <td>${fine.violation}</td>
+                <td>₹${fine.amount}</td>
+                <td>${statusBadge}</td>
+            `;
+            
+            fineHistoryTable.appendChild(row);
+        });
+        
+        // Handle violation type change
+        document.getElementById('violationType').addEventListener('change', function() {
+            if (this.value === 'Other violation') {
+                document.getElementById('otherViolationContainer').style.display = 'block';
+            } else {
+                document.getElementById('otherViolationContainer').style.display = 'none';
+            }
+        });
+        
+        // Handle Trust ID verification
+        verifyTrustIdBtn.addEventListener('click', function() {
+            const phone = document.getElementById('passengerPhone').value;
+            if (!phone || phone.length !== 10) {
+                alert('Please enter a valid 10-digit phone number');
+                return;
+            }
+            
+            const trustIdStatus = document.getElementById('trustIdStatus');
+            trustIdStatus.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Verifying...';
+            
+            // Simulate API call to verify Trust ID
+            setTimeout(() => {
+                // Random verification (80% success rate for demo)
+                if (Math.random() > 0.2) {
+                    trustIdStatus.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> Trust ID verified</span>';
+                } else {
+                    trustIdStatus.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> Trust ID not found</span>';
+                }
+            }, 1500);
+        });
+        
+        // Handle form submission for fine preview
+        issueFineForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const phone = document.getElementById('passengerPhone').value;
+            const trainNumber = document.getElementById('trainNumber').value;
+            const coach = document.getElementById('coach').value;
+            const violationType = document.getElementById('violationType').value;
+            const violation = violationType === 'Other violation' ? 
+                document.getElementById('otherViolation').value : violationType;
+            const amount = document.getElementById('fineAmount').value;
+            
+            // Populate preview
+            document.getElementById('previewFineId').textContent = 'RGFN' + Math.floor(1000000 + Math.random() * 9000000);
+            document.getElementById('previewPassenger').textContent = phone.substring(0, 2) + 'XXXXXX' + phone.substring(8);
+            document.getElementById('previewTrain').textContent = `${trainNumber} / Coach: ${coach}`;
+            document.getElementById('previewViolation').textContent = violation;
+            document.getElementById('previewAmount').innerHTML = `<strong>₹${amount}.00</strong>`;
+            document.getElementById('previewIssuedBy').textContent = 'TT: John Doe (EMP123456)'; // This would come from session
+            document.getElementById('previewDateTime').textContent = new Date().toLocaleString();
+            document.getElementById('previewBlockchainHash').textContent = '0x' + Math.random().toString(16).substring(2, 10) + '...';
+            
+            // Show preview and hide history
+            finePreview.classList.remove('d-none');
+            fineHistory.classList.add('d-none');
+        });
+        
+        // Handle confirm fine button
+        confirmFineBtn.addEventListener('click', function() {
+            const phone = document.getElementById('passengerPhone').value;
+            const amount = document.getElementById('fineAmount').value;
+            const violationType = document.getElementById('violationType').value;
+            const violation = violationType === 'Other violation' ? 
+                document.getElementById('otherViolation').value : violationType;
+            
+            // Submit fine through API
+            fetch('/api/issue-fine', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phone: phone,
+                    amount: amount,
+                    reason: violation
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Fine issued successfully');
+                    
+                    // Add to history table
+                    const row = document.createElement('tr');
+                    const formattedDate = new Date().toLocaleDateString();
+                    const maskedPhone = phone.substring(0, 2) + 'XXXXXX' + phone.substring(8);
+                    
+                    row.innerHTML = `
+                        <td>${formattedDate}</td>
+                        <td>${maskedPhone}</td>
+                        <td>${violation}</td>
+                        <td>₹${amount}</td>
+                        <td><span class="badge bg-warning">Pending</span></td>
+                    `;
+                    
+                    fineHistoryTable.insertBefore(row, fineHistoryTable.firstChild);
+                    
+                    // Reset form and UI
+                    issueFineForm.reset();
+                    finePreview.classList.add('d-none');
+                    fineHistory.classList.remove('d-none');
+                    document.getElementById('trustIdStatus').innerHTML = 'Trust ID status will appear here';
+                } else {
+                    alert('Error issuing fine: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error issuing fine:', error);
+                alert('Error issuing fine. Please try again.');
+            });
+        });
+        
+        // Handle cancel fine button
+        cancelFineBtn.addEventListener('click', function() {
+            finePreview.classList.add('d-none');
+            fineHistory.classList.remove('d-none');
+        });
+        
+        // QR Scanner setup
+        scanQrBtn.addEventListener('click', function() {
+            const qrScannerModal = new bootstrap.Modal(document.getElementById('qrScannerModal'));
+            qrScannerModal.show();
+            
+            const video = document.getElementById('qr-video');
+            const scanResult = document.getElementById('scanResult');
+            const resultText = document.getElementById('resultText');
+            const useScannedDataBtn = document.getElementById('useScannedDataBtn');
+            
+            let cameraStream = null;
+            let scanning = false;
+            
+            // Setup camera
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(function(stream) {
+                    cameraStream = stream;
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', true);
+                    video.play();
+                    scanning = true;
+                    scanQRCode();
+                })
+                .catch(function(err) {
+                    console.error("Error accessing camera: ", err);
+                    alert("Could not access camera. Please check permissions.");
+                });
+            
+            function scanQRCode() {
+                if (!scanning) return;
+                
+                const canvas = document.createElement('canvas');
+                const canvasContext = canvas.getContext('2d');
+                
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    canvas.height = video.videoHeight;
+                    canvas.width = video.videoWidth;
+                    canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+                    
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: "dontInvert",
+                    });
+                    
+                    if (code) {
+                        scanning = false;
+                        resultText.textContent = code.data;
+                        scanResult.classList.remove('d-none');
+                        useScannedDataBtn.disabled = false;
+                        
+                        // Handle scanned data
+                        useScannedDataBtn.addEventListener('click', function() {
+                            // Parse QR data (expected format: train|coach|seat|phone)
+                            const parts = code.data.split('|');
+                            if (parts.length === 4) {
+                                document.getElementById('trainNumber').value = parts[0];
+                                document.getElementById('coach').value = parts[1];
+                                document.getElementById('passengerPhone').value = parts[3];
+                                
+                                // Close modal
+                                qrScannerModal.hide();
+                                
+                                // Verify Trust ID automatically
+                                verifyTrustIdBtn.click();
+                            } else {
+                                alert('Invalid QR code format');
+                            }
+                        });
+                    }
+                }
+                
+                if (scanning) {
+                    requestAnimationFrame(scanQRCode);
+                }
+            }
+            
+            // Clean up on modal close
+            document.getElementById('qrScannerModal').addEventListener('hidden.bs.modal', function () {
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach(track => track.stop());
+                    cameraStream = null;
+                }
+                scanning = false;
+                scanResult.classList.add('d-none');
+                useScannedDataBtn.disabled = true;
+            });
+        });
+    });
+</script>
+{% endblock %}

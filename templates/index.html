@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}RailGuard India - Railway Passenger Protection System{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="hero-title">RailGuard India</h1>
+        <p class="hero-subtitle">A comprehensive Railway Passenger Protection System to create a transparent, corruption-free passenger experience.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('complaints') }}" class="btn btn-primary btn-lg">Report a Complaint</a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-lg">View Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row mb-5">
+        <div class="col-md-8 mx-auto text-center">
+            <h2 class="mb-4">Transforming Indian Railways Experience</h2>
+            <p class="lead">
+                RailGuard India addresses key issues like illegal fines, seat disputes, and standing passenger management
+                to ensure a fair and transparent journey for all passengers.
+            </p>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 feature-card">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="bi bi-chat-dots"></i>
+                    </div>
+                    <h4 class="card-title">Passenger Voice System</h4>
+                    <p class="card-text">
+                        Report issues with Ticket Checkers via SMS. Get real-time responses and track complaints until resolution.
+                    </p>
+                    <a href="{{ url_for('complaints') }}" class="btn btn-outline-primary mt-3">Report a Complaint</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 feature-card">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h4 class="card-title">Trust ID System</h4>
+                    <p class="card-text">
+                        Secure passenger identification using blockchain technology. Multiple verification methods with DPDP Act compliance.
+                    </p>
+                    <a href="{{ url_for('trust_id') }}" class="btn btn-outline-primary mt-3">Create Trust ID</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 feature-card">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="bi bi-qr-code"></i>
+                    </div>
+                    <h4 class="card-title">Standing Zone Management</h4>
+                    <p class="card-text">
+                        QR code-based standing passenger allocation. Get digital proof for TT verification and track availability in real-time.
+                    </p>
+                    <a href="{{ url_for('standing_zone') }}" class="btn btn-outline-primary mt-3">Get Standing Zone</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 feature-card">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="bi bi-ticket-perforated"></i>
+                    </div>
+                    <h4 class="card-title">Seat Management</h4>
+                    <p class="card-text">
+                        Digital seat tracking and reallocation system. Resolve seat disputes quickly with real-time updates.
+                    </p>
+                    <a href="{{ url_for('seat_management') }}" class="btn btn-outline-primary mt-3">Manage Seats</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 feature-card">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h4 class="card-title">AI-powered Analysis</h4>
+                    <p class="card-text">
+                        Complaints are analyzed using AI to determine risk levels. High-risk issues are prioritized for faster resolution.
+                    </p>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary mt-3">View Analytics</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 feature-card">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="bi bi-link-45deg"></i>
+                    </div>
+                    <h4 class="card-title">Blockchain Security</h4>
+                    <p class="card-text">
+                        All Trust IDs and transactions are secured on blockchain, ensuring transparency and preventing fraud.
+                    </p>
+                    <a href="{{ url_for('trust_id') }}" class="btn btn-outline-primary mt-3">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h3>How RailGuard Works</h3>
+                            <p>RailGuard India creates a seamless, transparent experience for railway passengers:</p>
+                            <ol>
+                                <li><strong>Create a Trust ID</strong> - Secure your identity with blockchain technology</li>
+                                <li><strong>Generate QR Tickets</strong> - Get digital tickets and standing zone allocations</li>
+                                <li><strong>Report Issues</strong> - Use SMS to report problems with Ticket Checkers</li>
+                                <li><strong>Track Complaints</strong> - Monitor your complaint status until resolution</li>
+                                <li><strong>Manage Seats</strong> - Resolve seat disputes with digital proof</li>
+                            </ol>
+                            <a href="{{ url_for('trust_id') }}" class="btn btn-primary mt-3">Get Started</a>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="50" y="50" width="300" height="200" rx="20" fill="#f8f9fa" stroke="#0d6efd" stroke-width="2"/>
+                                <circle cx="200" cy="150" r="70" fill="#e9ecef" stroke="#0d6efd" stroke-width="2"/>
+                                <path d="M200 80 L200 150 L250 150" stroke="#0d6efd" stroke-width="3" fill="none"/>
+                                <circle cx="200" cy="150" r="10" fill="#0d6efd"/>
+                                <text x="150" y="230" font-family="Arial" font-size="14" fill="#212529">RailGuard India</text>
+                                <text x="145" y="40" font-family="Arial" font-size="18" font-weight="bold" fill="#0d6efd">Passenger Protection</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

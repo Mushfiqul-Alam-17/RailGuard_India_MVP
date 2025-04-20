@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Standing Zone Management - RailGuard India{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="bi bi-people-fill"></i> Standing Zone Management</h2>
+        <p class="lead">QR code-based allocation for standing passengers</p>
+    </div>
+</div>
+
+{% if zone and qr_code %}
+<!-- Single Zone Display -->
+<div class="row justify-content-center mb-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Standing Zone Allocation #{{ zone.id }}</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="qr-container mb-4">
+                    <img src="{{ qr_code }}" alt="Standing Zone QR Code" class="qr-code">
+                    <p class="mt-3 mb-0">Scan this QR code for TT verification</p>
+                </div>
+                
+                <div class="ticket-details text-start">
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">Train Number:</div>
+                        <div class="col-7 fw-bold">{{ zone.train_number }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">Coach:</div>
+                        <div class="col-7 fw-bold">{{ zone.coach }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">Zone:</div>
+                        <div class="col-7 fw-bold">{{ zone.zone }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">Phone:</div>
+                        <div class="col-7">{{ zone.phone[-4:].rjust(10, '*') }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">Created:</div>
+                        <div class="col-7">{{ zone.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">Status:</div>
+                        <div class="col-7">
+                            <span class="badge bg-{{ 'success' if zone.status == 'valid' else 'danger' }}">
+                                {{ zone.status.upper() }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('standing_zone') }}" class="btn btn-primary">Allocate New Zone</a>
+                <button class="btn btn-success" onclick="window.print()">Print QR Code</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <!-- Standing Zone Allocation Form -->
+    <div class="col-md-6 mb-4">
+        <div class="card form-section">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Request Standing Zone</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('standing_zone') }}" method="post">
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}" placeholder="10-digit phone number" required>
+                        <small class="form-text text-muted">Enter the phone number registered with your Trust ID</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="train_number" class="form-label">Train Number</label>
+                        <input type="text" class="form-control" id="train_number" name="train_number" placeholder="E.g., 12345" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="coach" class="form-label">Coach</label>
+                            <input type="text" class="form-control" id="coach" name="coach" placeholder="E.g., S1" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="zone" class="form-label">Preferred Zone</label>
+                            <select class="form-select" id="zone" name="zone" required>
+                                <option value="" selected disabled>Select zone</option>
+                                <option value="A">Zone A (Near Door)</option>
+                                <option value="B">Zone B (Middle)</option>
+                                <option value="C">Zone C (Washroom End)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">Generate Standing Zone QR</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Zone Verification -->
+    <div class="col-md-6 mb-4">
+        <div class="card form-section">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Verify Standing Zone</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="zoneData" class="form-label">Zone QR Data</label>
+                    <input type="text" class="form-control" id="zoneData" placeholder="Scan QR code or enter zone data">
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button id="scanQRZoneBtn" class="btn btn-outline-primary">
+                        <i class="bi bi-qr-code-scan"></i> Scan QR Code
+                    </button>
+                    <button id="verifyZoneBtn" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Verify Zone
+                    </button>
+                </div>
+                
+                <div id="zoneDetailsContainer" class="mt-3"></div>
+                
+                <!-- Demo QR Simulation -->
+                <div class="mt-4 pt-3 border-top">
+                    <h6>Demo: Simulate QR Scan</h6>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="simulateScan('zone', '12345|S1|A|9876543210')">
+                        Simulate Valid Zone
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="simulateScan('zone', '12345|S1|X|1234567890')">
+                        Simulate Invalid Zone
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Zone Availability Chart -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Zone Availability (Train #12345)</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center py-4">
+                                <h5 class="card-title">Coach S1 - Zone A</h5>
+                                <div class="progress mb-3" style="height: 20px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">100%</div>
+                                </div>
+                                <p class="mb-0 text-danger fw-bold">
+                                    <i class="bi bi-exclamation-circle-fill"></i> No space available
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center py-4">
+                                <h5 class="card-title">Coach S1 - Zone B</h5>
+                                <div class="progress mb-3" style="height: 20px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">70%</div>
+                                </div>
+                                <p class="mb-0 text-warning fw-bold">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Limited space
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center py-4">
+                                <h5 class="card-title">Coach S2 - Zone A</h5>
+                                <div class="progress mb-3" style="height: 20px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" style="width: 90%" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100">90%</div>
+                                </div>
+                                <p class="mb-0 text-danger fw-bold">
+                                    <i class="bi bi-exclamation-circle-fill"></i> Almost full
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center py-4">
+                                <h5 class="card-title">Coach S2 - Zone B</h5>
+                                <div class="progress mb-3" style="height: 20px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">40%</div>
+                                </div>
+                                <p class="mb-0 text-success fw-bold">
+                                    <i class="bi bi-check-circle-fill"></i> Space available
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Coach Standing Layout Diagram -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Coach Standing Layout</h5>
+            </div>
+            <div class="card-body text-center">
+                <svg width="800" height="200" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Coach Outline -->
+                    <rect x="50" y="40" width="700" height="120" fill="#f8f9fa" stroke="#0d6efd" stroke-width="2" rx="10" />
+                    
+                    <!-- Zone A (Near Door) -->
+                    <rect x="50" y="40" width="230" height="120" fill="#dc3545" fill-opacity="0.2" stroke="#dc3545" stroke-width="2" rx="10" />
+                    <text x="165" y="100" text-anchor="middle" fill="#dc3545" font-weight="bold">ZONE A (FULL)</text>
+                    
+                    <!-- Zone B (Middle) -->
+                    <rect x="280" y="40" width="230" height="120" fill="#ffc107" fill-opacity="0.2" stroke="#ffc107" stroke-width="2" />
+                    <text x="395" y="100" text-anchor="middle" fill="#ffc107" font-weight="bold">ZONE B (LIMITED)</text>
+                    
+                    <!-- Zone C (Washroom End) -->
+                    <rect x="510" y="40" width="240" height="120" fill="#198754" fill-opacity="0.2" stroke="#198754" stroke-width="2" rx="10" />
+                    <text x="630" y="100" text-anchor="middle" fill="#198754" font-weight="bold">ZONE C (AVAILABLE)</text>
+                    
+                    <!-- Doors -->
+                    <rect x="50" y="80" width="20" height="40" fill="#0d6efd" />
+                    <rect x="730" y="80" width="20" height="40" fill="#0d6efd" />
+                    
+                    <!-- Legend -->
+                    <circle cx="100" cy="180" r="8" fill="#dc3545" fill-opacity="0.5" />
+                    <text x="115" y="185" fill="#212529">Full</text>
+                    
+                    <circle cx="170" cy="180" r="8" fill="#ffc107" fill-opacity="0.5" />
+                    <text x="185" y="185" fill="#212529">Limited Space</text>
+                    
+                    <circle cx="280" cy="180" r="8" fill="#198754" fill-opacity="0.5" />
+                    <text x="295" y="185" fill="#212529">Available</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Standing Zone Allocations -->
+{% if zones %}
+<div class="row mt-3">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Standing Zone Allocations</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Train</th>
+                                <th>Coach</th>
+                                <th>Zone</th>
+                                <th>Phone</th>
+                                <th>Created</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for zone in zones %}
+                            <tr>
+                                <td>#{{ zone.id }}</td>
+                                <td>{{ zone.train_number }}</td>
+                                <td>{{ zone.coach }}</td>
+                                <td>{{ zone.zone }}</td>
+                                <td>{{ zone.phone[-4:].rjust(10, '*') }}</td>
+                                <td>{{ zone.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if zone.status == 'valid' else 'danger' }}">
+                                        {{ zone.status.upper() }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('standing_zone', zone_id=zone.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

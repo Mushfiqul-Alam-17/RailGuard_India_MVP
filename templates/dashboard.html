@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - RailGuard India{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+        <p class="lead">Overview of RailGuard India system statistics and analytics</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 col-sm-6 mb-3">
+        <div class="card stat-card complaint">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-muted">Total Complaints</h6>
+                        <div class="stat-value">{{ complaint_count }}</div>
+                    </div>
+                    <div class="bg-danger bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-chat-dots text-danger fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 col-sm-6 mb-3">
+        <div class="card stat-card high-risk">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-muted">High Risk Complaints</h6>
+                        <div class="stat-value">{{ high_risk_complaints }}</div>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-exclamation-triangle text-warning fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 col-sm-6 mb-3">
+        <div class="card stat-card ticket">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-muted">Active Tickets</h6>
+                        <div class="stat-value">{{ ticket_count }}</div>
+                    </div>
+                    <div class="bg-success bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-ticket-perforated text-success fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 col-sm-6 mb-3">
+        <div class="card stat-card trust-id">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-muted">Trust IDs</h6>
+                        <div class="stat-value">{{ trust_id_count }}</div>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-shield-lock text-primary fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 col-sm-6 mb-3">
+        <div class="card stat-card standing">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-muted">Standing Zones</h6>
+                        <div class="stat-value">{{ standing_count }}</div>
+                    </div>
+                    <div class="bg-info bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-person-standing text-info fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Complaint Analytics</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="complaintsChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Ticket Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="ticketsChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent High Risk Complaints</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Phone</th>
+                                <th>Message</th>
+                                <th>Time</th>
+                                <th>Risk</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#1053</td>
+                                <td>******8751</td>
+                                <td>TT asked for money without receipt</td>
+                                <td>10 min ago</td>
+                                <td><span class="badge bg-danger">High</span></td>
+                                <td><span class="badge bg-warning text-dark">Pending</span></td>
+                            </tr>
+                            <tr>
+                                <td>#1052</td>
+                                <td>******4582</td>
+                                <td>TT forced me to pay cash for luggage</td>
+                                <td>25 min ago</td>
+                                <td><span class="badge bg-danger">High</span></td>
+                                <td><span class="badge bg-info">Investigating</span></td>
+                            </tr>
+                            <tr>
+                                <td>#1049</td>
+                                <td>******1234</td>
+                                <td>TT fined me extra without proper reason</td>
+                                <td>1 hour ago</td>
+                                <td><span class="badge bg-danger">High</span></td>
+                                <td><span class="badge bg-success">Resolved</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Coach Occupancy Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Coach</th>
+                                <th>Total Seats</th>
+                                <th>Occupied</th>
+                                <th>Vacant</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>S1</td>
+                                <td>72</td>
+                                <td>68</td>
+                                <td>4</td>
+                                <td><div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" style="width: 95%"></div>
+                                </div></td>
+                            </tr>
+                            <tr>
+                                <td>S2</td>
+                                <td>72</td>
+                                <td>65</td>
+                                <td>7</td>
+                                <td><div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" style="width: 90%"></div>
+                                </div></td>
+                            </tr>
+                            <tr>
+                                <td>S3</td>
+                                <td>72</td>
+                                <td>60</td>
+                                <td>12</td>
+                                <td><div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 83%"></div>
+                                </div></td>
+                            </tr>
+                            <tr>
+                                <td>S4</td>
+                                <td>72</td>
+                                <td>45</td>
+                                <td>27</td>
+                                <td><div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 62%"></div>
+                                </div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Standing Zone Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Coach</th>
+                                <th>Zone</th>
+                                <th>Capacity</th>
+                                <th>Allocated</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>S1</td>
+                                <td>A</td>
+                                <td>10</td>
+                                <td>10</td>
+                                <td><span class="zone-indicator zone-red"></span>Full</td>
+                            </tr>
+                            <tr>
+                                <td>S1</td>
+                                <td>B</td>
+                                <td>10</td>
+                                <td>8</td>
+                                <td><span class="zone-indicator zone-yellow"></span>Limited</td>
+                            </tr>
+                            <tr>
+                                <td>S2</td>
+                                <td>A</td>
+                                <td>10</td>
+                                <td>10</td>
+                                <td><span class="zone-indicator zone-red"></span>Full</td>
+                            </tr>
+                            <tr>
+                                <td>S2</td>
+                                <td>B</td>
+                                <td>10</td>
+                                <td>5</td>
+                                <td><span class="zone-indicator zone-green"></span>Available</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,253 @@
+
+.seat-heatmap {
+    position: relative;
+    margin: 20px;
+}
+
+.heat-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.heat-high { background-color: rgba(255, 0, 0, 0.6); }
+.heat-medium { background-color: rgba(255, 165, 0, 0.6); }
+.heat-low { background-color: rgba(0, 255, 0, 0.6); }
+/* Heatmap Specific Styles */
+#map {
+    height: 400px;
+    width: 100%;
+    border-radius: 0.5rem;
+    z-index: 1;
+}
+
+.map-container {
+    position: relative;
+}
+
+.map-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 2;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.map-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.legend-color {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.high-risk {
+    background-color: #dc3545;
+}
+
+.medium-risk {
+    background-color: #fd7e14;
+}
+
+.low-risk {
+    background-color: #198754;
+}
+
+.verification {
+    background-color: #0d6efd;
+}
+
+.heat-zone {
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.heat-zone:hover {
+    transform: scale(1.2);
+    z-index: 10;
+}
+
+/* Risk Zone Markers */
+.marker-high {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: rgba(220, 53, 69, 0.6);
+    border: 2px solid rgba(220, 53, 69, 0.9);
+}
+
+.marker-medium {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: rgba(253, 126, 20, 0.6);
+    border: 2px solid rgba(253, 126, 20, 0.9);
+}
+
+.marker-low {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(25, 135, 84, 0.6);
+    border: 2px solid rgba(25, 135, 84, 0.9);
+}
+
+.marker-verification {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(13, 110, 253, 0.6);
+    border: 2px solid rgba(13, 110, 253, 0.9);
+}
+
+/* Popup styles */
+.custom-popup {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.custom-popup .leaflet-popup-content-wrapper {
+    border-radius: 5px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.custom-popup .leaflet-popup-content {
+    margin: 0;
+    width: 250px !important;
+}
+
+.popup-header {
+    padding: 8px 12px;
+    color: white;
+    font-weight: 600;
+}
+
+.popup-header.high {
+    background-color: #dc3545;
+}
+
+.popup-header.medium {
+    background-color: #fd7e14;
+}
+
+.popup-header.low {
+    background-color: #198754;
+}
+
+.popup-header.verification {
+    background-color: #0d6efd;
+}
+
+.popup-content {
+    padding: 12px;
+}
+
+.popup-content p {
+    margin: 0 0 5px 0;
+}
+
+.popup-content .time {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* Filters */
+.filter-controls {
+    margin-bottom: 1rem;
+}
+
+.filter-btn {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+}
+
+.filter-btn.active {
+    color: white;
+}
+
+.filter-btn.high {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.filter-btn.high.active {
+    background-color: #dc3545;
+}
+
+.filter-btn.medium {
+    background-color: rgba(253, 126, 20, 0.1);
+    color: #fd7e14;
+    border-color: #fd7e14;
+}
+
+.filter-btn.medium.active {
+    background-color: #fd7e14;
+}
+
+.filter-btn.low {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+    border-color: #198754;
+}
+
+.filter-btn.low.active {
+    background-color: #198754;
+}
+
+.filter-btn.verification {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.filter-btn.verification.active {
+    background-color: #0d6efd;
+}
+
+/* Heat cluster styles */
+.marker-cluster {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    width: 30px !important;
+    height: 30px !important;
+    line-height: 30px !important;
+    text-align: center;
+    font-weight: bold;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.marker-cluster-small {
+    background-color: rgba(181, 226, 140, 0.8);
+}
+
+.marker-cluster-medium {
+    background-color: rgba(241, 211, 87, 0.8);
+}
+
+.marker-cluster-large {
+    background-color: rgba(253, 156, 115, 0.8);
+}

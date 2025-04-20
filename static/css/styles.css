@@ -1,0 +1,356 @@
+/* RailGuard India - Main Stylesheet */
+
+:root {
+  --primary: var(--indian-green);
+  --secondary: #6c757d;
+  --success: var(--indian-green);
+  --danger: #dc3545;
+  --warning: #ffc107;
+  --info: #0dcaf0;
+  --light: #f8f9fa;
+  --white: #ffffff;
+  --dark: #212529;
+  --indian-red: #d95f5f;
+  --indian-green: #138808;
+  --indian-orange: #FF9933;
+  --indian-blue: #000080;
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  padding-top: 56px;
+  background-color: var(--white);
+  color: var(--dark);
+}
+
+/* Navbar customization */
+.navbar {
+  background-color: var(--primary) !important;
+}
+
+.navbar-brand, .navbar-nav .nav-link {
+  color: var(--white) !important;
+  font-weight: 600;
+}
+
+.navbar-brand:hover, .navbar-nav .nav-link:hover {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.navbar-brand .logo-text {
+  color: var(--white);
+}
+
+/* Card customization */
+.card {
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  margin-bottom: 1.5rem;
+  border: 1px solid #e0e0e0;
+  background-color: var(--white);
+}
+
+.card-header {
+  background-color: var(--light);
+  border-bottom: 1px solid #e0e0e0;
+  font-weight: 600;
+  color: var(--dark);
+}
+
+/* Dashboard stats */
+.stat-card {
+  border-left: 4px solid var(--primary);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-card.complaint {
+  border-left-color: var(--danger);
+}
+
+.stat-card.high-risk {
+  border-left-color: var(--warning);
+}
+
+.stat-card.ticket {
+  border-left-color: var(--primary);
+}
+
+.stat-card.trust-id {
+  border-left-color: var(--primary);
+}
+
+.stat-card.standing {
+  border-left-color: var(--info);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* QR code styling */
+.qr-container {
+  background: var(--light);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  text-align: center;
+  max-width: 350px;
+  margin: 0 auto;
+  border: 1px solid #e0e0e0;
+}
+
+.qr-code {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+}
+
+/* Risk level indicators */
+.risk-high {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.risk-low {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Seat map */
+.seat-map {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 1rem 0;
+}
+
+.seat {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.seat.vacant {
+  background-color: var(--light);
+  color: var(--dark);
+  border: 1px solid var(--primary);
+}
+
+.seat.occupied {
+  background-color: var(--secondary);
+  color: white;
+  border: 1px solid var(--secondary);
+}
+
+.seat.selected {
+  background-color: var(--primary);
+  color: white;
+  border: 1px solid var(--primary);
+}
+
+/* Standing zone indicators */
+.zone-indicator {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.zone-green {
+  background-color: var(--primary);
+}
+
+.zone-yellow {
+  background-color: var(--warning);
+}
+
+.zone-red {
+  background-color: var(--danger);
+}
+
+/* Forms */
+.form-section {
+  background-color: var(--white);
+  border-radius: 0.5rem;
+  padding: 2rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid #e0e0e0;
+}
+
+.form-label {
+  font-weight: 600;
+}
+
+/* Ticket details */
+.ticket-details {
+  background-color: var(--white);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid #e0e0e0;
+}
+
+.ticket-title {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.ticket-info-item {
+  margin-bottom: 0.75rem;
+}
+
+.ticket-info-label {
+  font-weight: 600;
+  color: var(--secondary);
+}
+
+/* Home page hero */
+.hero-section {
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+              url('https://source.unsplash.com/1600x900/?india,train,railway') no-repeat center center;
+  background-size: cover;
+  padding: 5rem 0;
+  color: white;
+  margin-bottom: 3rem;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+/* Feature cards */
+.feature-card {
+  text-align: center;
+  padding: 2rem;
+  transition: transform 0.3s;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
+
+/* Footer */
+.footer {
+  background-color: var(--dark);
+  color: white;
+  padding: 3rem 0;
+  margin-top: 3rem;
+}
+
+.footer-title {
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
+
+.footer-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.footer-list li {
+  margin-bottom: 0.75rem;
+}
+
+.footer-list a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-list a:hover {
+  color: var(--primary);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--white) !important;
+}
+.btn-primary:hover {
+  background-color: #106a07 !important;
+  border-color: #0d5305 !important;
+}
+
+.btn-secondary {
+  background-color: var(--secondary) !important;
+  border-color: var(--secondary) !important;
+  color: var(--white) !important;
+}
+.btn-secondary:hover {
+  background-color: #5a6268 !important;
+  border-color: #545b62 !important;
+}
+
+.btn-success {
+    background-color: var(--success) !important;
+    border-color: var(--success) !important;
+    color: white !important;
+}
+.btn-success:hover {
+    background-color: #157347 !important;
+    border-color: #146c43 !important;
+}
+
+.btn-danger {
+    background-color: var(--danger) !important;
+    border-color: var(--danger) !important;
+    color: white !important;
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b !important;
+    border-color: #b02a37 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.25rem;
+  }
+  
+  .qr-code {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .seat {
+    width: 40px;
+    height: 40px;
+    font-size: 0.8rem;
+  }
+}

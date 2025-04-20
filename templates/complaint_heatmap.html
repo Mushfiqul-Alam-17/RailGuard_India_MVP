@@ -1,0 +1,476 @@
+
+{% extends "base.html" %}
+
+{% block title %}Complaint Heatmap - RailGuard India{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/heatmap.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="bi bi-geo-alt"></i> Complaint & Verification Heatmap</h2>
+        <p class="lead">Geographic distribution of complaints and ticket verifications across Indian Railways</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">National Heatmap</h5>
+                <div class="filter-controls">
+                    <button class="filter-btn high active" data-filter="high">High Risk</button>
+                    <button class="filter-btn medium active" data-filter="medium">Medium Risk</button>
+                    <button class="filter-btn low active" data-filter="low">Low Risk</button>
+                    <button class="filter-btn verification active" data-filter="verification">Verifications</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="map-container">
+                    <div id="map"></div>
+                    <div class="map-overlay">
+                        <div class="map-legend">
+                            <div class="legend-item">
+                                <div class="legend-color high-risk"></div>
+                                <span>High Risk Complaints</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color medium-risk"></div>
+                                <span>Medium Risk Complaints</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color low-risk"></div>
+                                <span>Low Risk Complaints</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color verification"></div>
+                                <span>Ticket Verifications</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Route Risk Analysis -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Top Risk Routes</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Route</th>
+                                <th>Train Numbers</th>
+                                <th>Complaints</th>
+                                <th>Risk Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for route in top_routes %}
+                            <tr>
+                                <td>{{ route.route }}</td>
+                                <td>{{ route.trains }}</td>
+                                <td>{{ route.complaints }}</td>
+                                <td>
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar bg-{{ 'danger' if route.risk_score > 70 else 'warning' if route.risk_score > 40 else 'success' }}" 
+                                             role="progressbar" 
+                                             style="width: {{ route.risk_score }}%;" 
+                                             aria-valuenow="{{ route.risk_score }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Time Analysis -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Complaint Time Analysis</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="timeAnalysisChart" height="280"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Risk by Zone -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Railway Zone Risk Assessment</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="zoneRiskChart" height="280"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TT Performance Map -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">TT Performance by Region</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="ttPerformanceChart" height="280"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map
+        const map = L.map('map').setView([20.5937, 78.9629], 5); // Center on India
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Create marker clusters for each type
+        const highRiskCluster = L.markerClusterGroup({
+            iconCreateFunction: function(cluster) {
+                return L.divIcon({
+                    html: '<div><span>' + cluster.getChildCount() + '</span></div>',
+                    className: 'marker-cluster marker-cluster-large',
+                    iconSize: new L.Point(40, 40)
+                });
+            }
+        });
+        
+        const mediumRiskCluster = L.markerClusterGroup({
+            iconCreateFunction: function(cluster) {
+                return L.divIcon({
+                    html: '<div><span>' + cluster.getChildCount() + '</span></div>',
+                    className: 'marker-cluster marker-cluster-medium',
+                    iconSize: new L.Point(40, 40)
+                });
+            }
+        });
+        
+        const lowRiskCluster = L.markerClusterGroup({
+            iconCreateFunction: function(cluster) {
+                return L.divIcon({
+                    html: '<div><span>' + cluster.getChildCount() + '</span></div>',
+                    className: 'marker-cluster marker-cluster-small',
+                    iconSize: new L.Point(40, 40)
+                });
+            }
+        });
+        
+        const verificationCluster = L.markerClusterGroup({
+            iconCreateFunction: function(cluster) {
+                return L.divIcon({
+                    html: '<div><span>' + cluster.getChildCount() + '</span></div>',
+                    className: 'marker-cluster',
+                    iconSize: new L.Point(40, 40)
+                });
+            }
+        });
+        
+        // Add clusters to map
+        map.addLayer(highRiskCluster);
+        map.addLayer(mediumRiskCluster);
+        map.addLayer(lowRiskCluster);
+        map.addLayer(verificationCluster);
+        
+        // Custom marker icons
+        function createMarkerIcon(className) {
+            return L.divIcon({
+                className: className,
+                iconSize: [16, 16]
+            });
+        }
+        
+        const highRiskIcon = createMarkerIcon('marker-high');
+        const mediumRiskIcon = createMarkerIcon('marker-medium');
+        const lowRiskIcon = createMarkerIcon('marker-low');
+        const verificationIcon = createMarkerIcon('marker-verification');
+        
+        // Custom popup for markers
+        function createPopup(data, type) {
+            const popupContent = document.createElement('div');
+            popupContent.className = 'custom-popup';
+            
+            let headerClass = '';
+            let headerText = '';
+            
+            switch(type) {
+                case 'high':
+                    headerClass = 'high';
+                    headerText = 'High Risk Complaint';
+                    break;
+                case 'medium':
+                    headerClass = 'medium';
+                    headerText = 'Medium Risk Complaint';
+                    break;
+                case 'low':
+                    headerClass = 'low';
+                    headerText = 'Low Risk Complaint';
+                    break;
+                case 'verification':
+                    headerClass = 'verification';
+                    headerText = 'Ticket Verification';
+                    break;
+            }
+            
+            popupContent.innerHTML = `
+                <div class="popup-header ${headerClass}">
+                    ${headerText}
+                </div>
+                <div class="popup-content">
+                    <p><strong>Location:</strong> ${data.location}</p>
+                    <p><strong>Train:</strong> ${data.train_number}</p>
+                    <p class="time">${data.timestamp}</p>
+                </div>
+            `;
+            
+            return popupContent;
+        }
+        
+        // Fetch data from API
+        fetch('/api/complaints/geo')
+            .then(response => response.json())
+            .then(data => {
+                // Add markers for each data point
+                data.forEach(point => {
+                    let marker;
+                    let cluster;
+                    
+                    switch(point.risk_level) {
+                        case 'High':
+                            marker = L.marker([point.lat, point.lon], {icon: highRiskIcon});
+                            marker.bindPopup(createPopup(point, 'high'));
+                            cluster = highRiskCluster;
+                            break;
+                        case 'Medium':
+                            marker = L.marker([point.lat, point.lon], {icon: mediumRiskIcon});
+                            marker.bindPopup(createPopup(point, 'medium'));
+                            cluster = mediumRiskCluster;
+                            break;
+                        case 'Low':
+                            marker = L.marker([point.lat, point.lon], {icon: lowRiskIcon});
+                            marker.bindPopup(createPopup(point, 'low'));
+                            cluster = lowRiskCluster;
+                            break;
+                    }
+                    
+                    cluster.addLayer(marker);
+                });
+            })
+            .catch(error => console.error('Error fetching complaint data:', error));
+        
+        // Fetch verification data
+        fetch('/api/verifications/geo')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(point => {
+                    const marker = L.marker([point.lat, point.lon], {icon: verificationIcon});
+                    marker.bindPopup(createPopup(point, 'verification'));
+                    verificationCluster.addLayer(marker);
+                });
+            })
+            .catch(error => console.error('Error fetching verification data:', error));
+        
+        // Filter controls
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const filter = this.dataset.filter;
+                
+                switch(filter) {
+                    case 'high':
+                        if (this.classList.contains('active')) {
+                            map.addLayer(highRiskCluster);
+                        } else {
+                            map.removeLayer(highRiskCluster);
+                        }
+                        break;
+                    case 'medium':
+                        if (this.classList.contains('active')) {
+                            map.addLayer(mediumRiskCluster);
+                        } else {
+                            map.removeLayer(mediumRiskCluster);
+                        }
+                        break;
+                    case 'low':
+                        if (this.classList.contains('active')) {
+                            map.addLayer(lowRiskCluster);
+                        } else {
+                            map.removeLayer(lowRiskCluster);
+                        }
+                        break;
+                    case 'verification':
+                        if (this.classList.contains('active')) {
+                            map.addLayer(verificationCluster);
+                        } else {
+                            map.removeLayer(verificationCluster);
+                        }
+                        break;
+                }
+            });
+        });
+        
+        // Time Analysis Chart
+        const timeCtx = document.getElementById('timeAnalysisChart').getContext('2d');
+        const timeChart = new Chart(timeCtx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
+                datasets: [{
+                    label: 'High Risk Complaints',
+                    data: [12, 10, 8, 5, 15, 25, 30, 35, 40, 30, 20, 15],
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Medium Risk Complaints',
+                    data: [20, 15, 10, 15, 25, 35, 45, 40, 30, 25, 30, 25],
+                    borderColor: '#fd7e14',
+                    backgroundColor: 'rgba(253, 126, 20, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Low Risk Complaints',
+                    data: [30, 25, 20, 25, 35, 45, 50, 45, 35, 40, 45, 35],
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Complaint Distribution by Time of Day'
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Complaints'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time of Day'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Zone Risk Chart
+        const zoneCtx = document.getElementById('zoneRiskChart').getContext('2d');
+        const zoneChart = new Chart(zoneCtx, {
+            type: 'bar',
+            data: {
+                labels: ['CR', 'ER', 'ECR', 'ECoR', 'NR', 'NCR', 'NER', 'NFR', 'NWR', 'SR', 'SCR', 'SER', 'SECR', 'SWR', 'WR', 'WCR'],
+                datasets: [{
+                    label: 'Risk Score',
+                    data: [75, 65, 80, 60, 85, 70, 55, 45, 60, 50, 65, 70, 75, 55, 65, 60],
+                    backgroundColor: function(context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        return value > 70 ? 'rgba(220, 53, 69, 0.7)' : 
+                               value > 60 ? 'rgba(253, 126, 20, 0.7)' : 
+                               'rgba(25, 135, 84, 0.7)';
+                    },
+                    borderColor: function(context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        return value > 70 ? 'rgb(220, 53, 69)' : 
+                               value > 60 ? 'rgb(253, 126, 20)' : 
+                               'rgb(25, 135, 84)';
+                    },
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Risk Assessment by Railway Zone'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Risk Score (0-100)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // TT Performance Chart
+        const ttCtx = document.getElementById('ttPerformanceChart').getContext('2d');
+        const ttChart = new Chart(ttCtx, {
+            type: 'polarArea',
+            data: {
+                labels: ['North', 'East', 'South', 'West', 'Central', 'North East'],
+                datasets: [{
+                    label: 'TT Performance',
+                    data: [75, 65, 80, 70, 60, 55],
+                    backgroundColor: [
+                        'rgba(13, 110, 253, 0.7)',
+                        'rgba(102, 16, 242, 0.7)',
+                        'rgba(111, 66, 193, 0.7)',
+                        'rgba(214, 51, 132, 0.7)',
+                        'rgba(220, 53, 69, 0.7)',
+                        'rgba(253, 126, 20, 0.7)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'TT Performance Score by Region'
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

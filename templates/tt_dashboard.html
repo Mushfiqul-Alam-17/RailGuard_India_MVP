@@ -1,0 +1,188 @@
+
+{% extends "base.html" %}
+
+{% block title %}TT Dashboard - RailGuard India{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="bi bi-speedometer2"></i> Ticket Checker Dashboard</h2>
+        <p class="lead">Welcome, {{ tt_user.full_name }} ({{ tt_user.employee_id }})</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Stats Cards -->
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 stat-card ticket">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="stat-title">Tickets Verified</h5>
+                        <p class="stat-value">{{ stats.tickets_verified }}</p>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="bi bi-ticket-perforated"></i>
+                    </div>
+                </div>
+                <p class="text-muted mb-0">Today: {{ stats.tickets_verified_today }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 stat-card standing">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="stat-title">Standing Zones</h5>
+                        <p class="stat-value">{{ stats.standing_zones }}</p>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+                <p class="text-muted mb-0">Today: {{ stats.standing_zones_today }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 stat-card complaint">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="stat-title">Fines Issued</h5>
+                        <p class="stat-value">{{ stats.fines }}</p>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                </div>
+                <p class="text-muted mb-0">Value: ₹{{ stats.fine_value }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 stat-card trust-id">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="stat-title">Performance</h5>
+                        <p class="stat-value">{{ tt_score }}</p>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                </div>
+                <p class="text-muted mb-0">Status: {{ 'Good' if tt_score >= 70 else 'Needs Improvement' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Activity Log -->
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Recent Activity</h5>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            <tr>
+                                <td>{{ log.timestamp.strftime('%H:%M') }}</td>
+                                <td>{{ log.action }}</td>
+                                <td>{{ log.details }}</td>
+                                <td>{{ log.location }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('ticket_scanner') }}" class="btn btn-primary">
+                        <i class="bi bi-qr-code-scan"></i> Scan Ticket
+                    </a>
+                    <a href="{{ url_for('issue_fine_form') }}" class="btn btn-warning">
+                        <i class="bi bi-cash"></i> Issue Fine
+                    </a>
+                    <a href="{{ url_for('seat_management') }}" class="btn btn-info">
+                        <i class="bi bi-layout-wtf"></i> Manage Seats
+                    </a>
+                    <a href="{{ url_for('sos_alerts') }}" class="btn btn-danger">
+                        <i class="bi bi-exclamation-triangle"></i> SOS Alerts
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Performance Chart -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Performance Metrics</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Performance chart
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    const performanceChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Ticket Verification', 'Complaint Handling', 'Response Time', 'Passenger Rating', 'Fine Accuracy'],
+            datasets: [{
+                label: 'Your Performance',
+                data: {{ performance_data|safe }},
+                fill: true,
+                backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                borderColor: 'rgb(13, 110, 253)',
+                pointBackgroundColor: 'rgb(13, 110, 253)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(13, 110, 253)'
+            }]
+        },
+        options: {
+            scales: {
+                r: {
+                    angleLines: {
+                        display: true
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 100
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

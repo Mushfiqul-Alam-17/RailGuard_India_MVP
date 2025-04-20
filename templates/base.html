@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RailGuard India{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="bi bi-shield-check"></i> Rail<span class="logo-text">Guard</span> India
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('index') %}active{% endif %}" 
+                           href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('dashboard') %}active{% endif %}" 
+                           href="{{ url_for('dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('ticket') %}active{% endif %}" 
+                           href="{{ url_for('ticket') }}">Tickets</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('standing_zone') %}active{% endif %}" 
+                           href="{{ url_for('standing_zone') }}">Standing Zones</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('complaints') %}active{% endif %}" 
+                           href="{{ url_for('complaints') }}">Complaints</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('trust_id') %}active{% endif %}" 
+                           href="{{ url_for('trust_id') }}">Trust ID</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('seat_management') %}active{% endif %}" 
+                           href="{{ url_for('seat_management') }}">Seat Management</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100; margin-top: 60px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="container my-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Hidden inputs for ticket/zone data -->
+    <input type="hidden" id="ticketData" value="">
+    <input type="hidden" id="zoneData" value="">
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="footer-title">RailGuard India</h5>
+                    <p>A comprehensive Railway Passenger Protection System to create a transparent, corruption-free passenger experience.</p>
+                </div>
+                <div class="col-md-2">
+                    <h5 class="footer-title">Links</h5>
+                    <ul class="footer-list">
+                        <li><a href="{{ url_for('index') }}">Home</a></li>
+                        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                        <li><a href="{{ url_for('complaints') }}">Complaints</a></li>
+                        <li><a href="{{ url_for('ticket') }}">Tickets</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5 class="footer-title">Features</h5>
+                    <ul class="footer-list">
+                        <li><a href="{{ url_for('trust_id') }}">Trust ID System</a></li>
+                        <li><a href="{{ url_for('standing_zone') }}">Standing Zone Management</a></li>
+                        <li><a href="{{ url_for('seat_management') }}">Seat Management</a></li>
+                        <li><a href="{{ url_for('complaints') }}">Passenger Voice System</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5 class="footer-title">Contact</h5>
+                    <ul class="footer-list">
+                        <li><i class="bi bi-envelope-fill"></i> <a href="mailto:info@railguard.in">info@railguard.in</a></li>
+                        <li><i class="bi bi-telephone-fill"></i> <a href="tel:+911234567890">+91 1234 567 890</a></li>
+                        <li><i class="bi bi-geo-alt-fill"></i> New Delhi, India</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; 2023 RailGuard India. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Global Dismiss Popup Button -->
+    <button id="globalDismissBtn" style="position: fixed; top: 70px; right: 20px; z-index: 9999; background-color: #ff3b30; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 24px; display: none; box-shadow: 0 2px 5px rgba(0,0,0,0.5); cursor: pointer;">×</button>
+    
+    <!-- Dismiss Popup Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dismissBtn = document.getElementById('globalDismissBtn');
+            
+            // Show dismiss button when a modal is open
+            document.body.addEventListener('shown.bs.modal', function() {
+                dismissBtn.style.display = 'block';
+            });
+            
+            // Hide dismiss button when all modals are closed
+            document.body.addEventListener('hidden.bs.modal', function() {
+                // Check if any modals are still open
+                const openModals = document.querySelectorAll('.modal.show');
+                if (openModals.length === 0) {
+                    dismissBtn.style.display = 'none';
+                }
+            });
+            
+            // Dismiss button click handler
+            dismissBtn.addEventListener('click', function() {
+                // Find all open modals and close them
+                const openModals = document.querySelectorAll('.modal.show');
+                openModals.forEach(function(modal) {
+                    const modalInstance = bootstrap.Modal.getInstance(modal);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                });
+                
+                // Also close any other popups if needed
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                
+                document.body.classList.remove('modal-open');
+                dismissBtn.style.display = 'none';
+            });
+        });
+    </script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/qr_scanner.js') }}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+<li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('facial_verification') }}">
+                        <i class="bi bi-person-badge me-2"></i>Facial Verification
+                    </a>
+                </li>
