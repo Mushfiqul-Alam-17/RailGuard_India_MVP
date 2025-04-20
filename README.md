@@ -1,4 +1,4 @@
-# RailGuard India (Placeholder Name)
+# RailGuard_India_MVP
 
 A web application for managing [Describe the core functionality, e.g., railway tickets, seat allocation, verification using QR codes].
 
@@ -44,4 +44,4 @@ The application will be accessible at `http://localhost:5000` (or `http://0.0.0.
 *   Backend: Flask, Flask-SocketIO, SQLAlchemy
 *   Frontend: HTML, CSS, JavaScript
 *   Database: PostgreSQL (likely, based on `psycopg2-binary`)
-*   Package Management: uv 
+*   Package Management: uv
